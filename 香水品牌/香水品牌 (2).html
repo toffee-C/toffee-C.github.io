@@ -1,0 +1,2406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>香水品牌全域策略分析系统</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        :root {
+            --primary: #7d3c98;
+            --secondary: #6c3483;
+            --accent: #e74c3c;
+            --light: #f8f9fa;
+            --dark: #2c3e50;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            --gray: #95a5a6;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f8f9fa 0%, #eef2f6 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 20px;
+            margin-bottom: 30px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 12px;
+            color: white;
+            box-shadow: 0 6px 20px rgba(125, 60, 152, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 0.2;
+        }
+        
+        .brand-logo {
+            display: inline-block;
+            background: white;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .brand-logo svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: auto;
+            min-height: 550px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chart-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .huai-card {
+            border-top: 4px solid var(--primary);
+        }
+        
+        .section-title {
+            padding: 15px 25px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            color: var(--dark);
+            margin: 40px 0 15px;
+            background: linear-gradient(90deg, rgba(125, 60, 152, 0.1) 0%, rgba(108, 52, 131, 0.1) 100%);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .section-title i {
+            margin-right: 15px;
+            font-size: 1.6rem;
+            color: var(--primary);
+        }
+        
+        .chart-header {
+            padding: 20px 25px 15px;
+            border-bottom: 1px solid #eee;
+            background: #fafbfc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chart-header h3 {
+            color: var(--primary);
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .chart-header h3 i {
+            margin-right: 10px;
+            color: var(--accent);
+        }
+        
+        .data-banner {
+            background: linear-gradient(90deg, rgba(231, 76, 60, 0.1) 0%, rgba(125, 60, 152, 0.1) 100%);
+            border-left: 4px solid var(--accent);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .data-banner i {
+            font-size: 2rem;
+            color: var(--accent);
+            margin-right: 20px;
+        }
+        
+        .data-banner h3 {
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+        
+        .data-banner p {
+            color: #6c757d;
+        }
+        
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+        
+        .brand-strategy-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .brand-strategy-table th {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            text-align: left;
+            padding: 15px;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        
+        .brand-strategy-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+            background: white;
+        }
+        
+        .brand-strategy-table tr:nth-child(even) td {
+            background-color: #fafbfc;
+        }
+        
+        .brand-strategy-table tr:hover td {
+            background-color: #f1f8ff;
+        }
+        
+        .brand-strategy-table td:first-child {
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .huai-row {
+            background-color: rgba(125, 60, 152, 0.05) !important;
+            font-weight: 600;
+        }
+        
+        .huai-row td:first-child {
+            color: var(--primary);
+        }
+        
+        .chart-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 15px;
+            background: var(--light);
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .brand-pie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 15px;
+        }
+        
+        .brand-pie-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            padding: 15px;
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+        
+        .brand-pie-card.huai-card {
+            border-top: 3px solid var(--primary);
+        }
+        
+        .brand-pie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        
+        .brand-pie-card h4 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .pie-container {
+            height: 250px;
+        }
+        
+        .content-explanation {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .content-explanation h5 {
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        .data-source {
+            padding: 10px 20px;
+            font-size: 0.85rem;
+            color: #6c757d;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            text-align: right;
+        }
+        
+        .content-type-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        .content-type-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            padding: 25px;
+            transition: all 0.3s ease;
+            border-top: 4px solid var(--primary);
+        }
+        
+        .content-type-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        
+        .content-type-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .type-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: white;
+            font-size: 1.5rem;
+        }
+        
+        .content-type-title {
+            font-size: 1.3rem;
+            color: var(--primary);
+        }
+        
+        .content-type-subtitle {
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+        
+        .content-type-body {
+            padding: 15px 0;
+            border-top: 1px solid #eee;
+            margin-top: 10px;
+        }
+        
+        .content-type-body h5 {
+            color: var(--dark);
+            margin: 15px 0 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .content-type-body h5 i {
+            margin-right: 8px;
+            color: var(--accent);
+        }
+        
+        .example-box {
+            background: #f9fbfd;
+            border-left: 3px solid var(--secondary);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 5px 5px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .example-box::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--secondary);
+        }
+        
+        .huai-example {
+            background: rgba(125, 60, 152, 0.05);
+            border-left: 3px solid var(--primary);
+        }
+        
+        .huai-example::before {
+            background: var(--primary);
+        }
+        
+        .swot-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        .swot-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            padding: 25px;
+        }
+        
+        .swot-title {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+        
+        .swot-title i {
+            margin-right: 10px;
+        }
+        
+        .swot-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .swot-list li {
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .swot-list li::before {
+            content: "•";
+            margin-right: 10px;
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+        
+        .strength li {
+            background: rgba(46, 204, 113, 0.1);
+            border-left: 3px solid var(--success);
+        }
+        
+        .weakness li {
+            background: rgba(231, 76, 60, 0.1);
+            border-left: 3px solid var(--accent);
+        }
+        
+        .opportunity li {
+            background: rgba(52, 152, 219, 0.1);
+            border-left: 3px solid var(--secondary);
+        }
+        
+        .threat li {
+            background: rgba(243, 156, 18, 0.1);
+            border-left: 3px solid var(--warning);
+        }
+        
+        .strategy-plan {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            padding: 25px;
+            margin-top: 20px;
+        }
+        
+        .strategy-plan h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .strategy-plan h3 i {
+            margin-right: 10px;
+        }
+        
+        .strategy-item {
+            display: flex;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .strategy-icon {
+            min-width: 50px;
+            height: 50px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .strategy-content {
+            flex: 1;
+        }
+        
+        .strategy-content h4 {
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+        
+        .strategy-content ul {
+            padding-left: 20px;
+        }
+        
+        .strategy-content li {
+            margin-bottom: 8px;
+        }
+        
+        .huai-highlight {
+            background: linear-gradient(120deg, rgba(125, 60, 152, 0.1), rgba(125, 60, 152, 0));
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: var(--gray);
+            margin-top: 40px;
+            font-size: 0.95rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .competitor-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .competitor-table th {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .competitor-table td {
+            padding: 15px;
+            border: 1px solid #e9ecef;
+            text-align: center;
+        }
+        
+        .competitor-table tr:nth-child(even) {
+            background-color: #fafbfc;
+        }
+        
+        .competitor-table tr:hover {
+            background-color: #f1f8ff;
+        }
+        
+        .chart-container {
+            position: relative;
+        }
+        
+        .chart-3d-container {
+            width: 100%;
+            height: 100%;
+            min-height: 450px;
+        }
+        
+        .douyin-insights-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        .insight-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            padding: 25px;
+            border-top: 4px solid var(--primary);
+        }
+        
+        .insight-card h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .insight-card h3 i {
+            margin-right: 10px;
+        }
+        
+        .insight-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .insight-table th, .insight-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .insight-table th {
+            background-color: #f8f9fa;
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .insight-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .brand-bubble-chart {
+            width: 100%;
+            height: 500px;
+        }
+        
+        .brand-info-panel {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .brand-info-panel h5 {
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* 新增的气泡图控制按钮样式 */
+        .chart-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: var(--secondary);
+        }
+        
+        .chart-footer {
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            background: #f9fbfd;
+            border-top: 1px solid #eee;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            background: rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .legend-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .color-box {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+            margin-right: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .data-explanation {
+            padding: 20px;
+            background: #f9fbfd;
+            border-top: 1px solid #eee;
+        }
+        
+        .data-explanation h4 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .data-explanation h4 i {
+            margin-right: 10px;
+            color: var(--accent);
+        }
+        
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .data-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+        
+        .data-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .data-card h5 {
+            margin-bottom: 10px;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+        }
+        
+        .data-card h5 i {
+            margin-right: 8px;
+            color: var(--accent);
+            font-size: 0.9rem;
+        }
+        
+        .data-card ul {
+            padding-left: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .data-card li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        .highlighted {
+            animation: highlight 1.5s ease-in-out;
+        }
+        
+        @keyframes highlight {
+            0% { box-shadow: 0 0 0 0 rgba(125, 60, 152, 0.5); }
+            70% { box-shadow: 0 0 0 10px rgba(125, 60, 152, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(125, 60, 152, 0); }
+        }
+        
+        @media (max-width: 1200px) {
+            .swot-grid, .douyin-insights-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-container {
+                height: 400px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .section-title {
+                font-size: 1.2rem;
+            }
+            
+            .content-type-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .swot-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .competitor-table {
+                font-size: 0.85rem;
+            }
+            
+            .douyin-insights-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-footer {
+                justify-content: flex-start;
+                overflow-x: auto;
+                flex-wrap: nowrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="brand-logo">
+            <svg viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="#7d3c98" stroke-width="3"/>
+                <path d="M30,35 Q50,20 70,35 T50,80" fill="none" stroke="#7d3c98" stroke-width="3"/>
+                <circle cx="50" cy="30" r="5" fill="#7d3c98"/>
+                <circle cx="40" cy="60" r="5" fill="#7d3c98"/>
+                <circle cx="60" cy="60" r="5" fill="#7d3c98"/>
+            </svg>
+        </div>
+        <h1>香水品牌全域策略分析系统</h1>
+        <p class="subtitle">基于2025年市场数据的品牌定位、内容策略与增长路径分析</p>
+    </header>
+    
+    <!-- 数据来源说明 -->
+    <div class="data-banner">
+        <i class="fas fa-database"></i>
+        <div>
+            <h3>数据来源</h3>
+            <p>巨量算数《2025美妆行业内容生态白皮书》｜ 新抖品牌自播监测2025Q3｜ 知萌咨询《香氛情绪价值白皮书》｜ 易观行业分析报告2025Q2</p>
+        </div>
+    </div>
+    
+    <!-- 品牌自营内容策略矩阵 -->
+    <div class="section-title">
+        <i class="fas fa-chess-queen"></i> 品牌自营内容策略矩阵
+        <p style="font-size: 1rem; margin-top: 10px; font-weight: normal; opacity: 0.9;">各品牌官方账号内容形式分布与平台侧重</p>
+    </div>
+    <div class="dashboard-container">
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3><i class="fas fa-chart-pie"></i> 各品牌内容形式分布</h3>
+            </div>
+            <div id="brandPieGrid" class="chart-container">
+                <div class="brand-pie-grid">
+                    <!-- 品牌饼图将在此动态生成 -->
+                </div>
+            </div>
+            <div class="data-source">
+                数据来源：蝉妈妈2025年7月内容分析报告 | 
+                <a href="https://example.com/chamama-report" target="_blank">查看报告详情</a>
+            </div>
+        </div>
+        
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3><i class="fas fa-table"></i> 核心策略与渠道布局</h3>
+            </div>
+            <div class="chart-container">
+                <div class="table-responsive">
+                    <table class="brand-strategy-table">
+                        <thead>
+                            <tr>
+                                <th>品牌</th>
+                                <th>内容定位</th>
+                                <th>主攻平台</th>
+                                <th>爆款内容模型</th>
+                            </tr>
+                        </thead>
+                        <tbody id="strategyTableBody">
+                            <!-- 动态表格数据由JS生成 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="data-source">
+                数据来源：品牌官方账号监测（2025年7月）| 
+                <a href="https://example.com/brand-monitor" target="_blank">监测报告详情</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 替换后的品牌定位气泡图 -->
+    <div class="section-title">
+        <i class="fas fa-chart-bubble"></i> 品牌定位气泡分析
+        <p style="font-size: 1rem; margin-top: 10px; font-weight: normal; opacity: 0.9;">客单价 vs 增长指数 vs 内容强度</p>
+    </div>
+    <div class="chart-card huai-card">
+        <div class="chart-header">
+            <h3><i class="fas fa-bullseye"></i> 品牌定位气泡图</h3>
+            <div class="chart-actions">
+                <button id="resetBtn" class="btn"><i class="fas fa-sync-alt"></i> 重置视图</button>
+            </div>
+        </div>
+        <div class="chart-container">
+            <div id="brandBubbleChart" class="brand-bubble-chart"></div>
+        </div>
+        
+        <div class="chart-footer">
+            <!-- 品牌颜色图例将在此动态生成 -->
+        </div>
+        
+        <div class="data-explanation">
+            <h4><i class="fas fa-info-circle"></i> 数据指标说明</h4>
+            <div class="data-grid">
+                <div class="data-card">
+                    <h5><i class="fas fa-tag"></i> 客单价（X轴）</h5>
+                    <ul>
+                        <li>代表品牌主力产品的平均售价</li>
+                        <li>数据范围：100-1200元</li>
+                        <li>数据来源：品牌旗舰店销售数据（2025年7月）</li>
+                    </ul>
+                </div>
+                
+                <div class="data-card">
+                    <h5><i class="fas fa-chart-line"></i> 增长指数（Y轴）</h5>
+                    <ul>
+                        <li>综合线上销售增长率+社交媒体声量增长</li>
+                        <li>数据范围：0-100分</li>
+                        <li>数据来源：易观增长指数报告</li>
+                    </ul>
+                </div>
+                
+                <div class="data-card">
+                    <h5><i class="fas fa-expand"></i> 内容强度（气泡大小）</h5>
+                    <ul>
+                        <li>基于内容更新频率+互动率+种草转化率</li>
+                        <li>数据范围：0-10分</li>
+                        <li>数据来源：蝉妈妈内容效能评估模型</li>
+                    </ul>
+                </div>
+                
+                <div class="data-card">
+                    <h5><i class="fas fa-palette"></i> 气泡颜色</h5>
+                    <ul>
+                        <li>每个品牌有独特的颜色标识</li>
+                        <li>相同品类品牌使用相近色调</li>
+                        <li>品牌专属颜色显示在底部图例</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="data-source">
+            数据来源：易观行业分析报告2025Q2 | 魔镜电商数据2025 | 新抖品牌自播数据2025Q3 | 
+            <a href="https://example.com/brand-positioning" target="_blank">数据详情</a>
+        </div>
+    </div>
+    
+    <!-- 人群匹配度雷达图 -->
+    <div class="section-title">
+        <i class="fas fa-user-friends"></i> 人群匹配度分析
+        <p style="font-size: 1rem; margin-top: 10px; font-weight: normal; opacity: 0.9;">五大核心人群需求契合度</p>
+    </div>
+    <div class="chart-card huai-card">
+        <div class="chart-header">
+            <h3><i class="fas fa-radar"></i> 品牌人群匹配度雷达图</h3>
+        </div>
+        <div id="audienceRadar" class="chart-container" style="min-height: 450px;"></div>
+        <div class="data-source">
+            数据来源：易观人群画像分析2025Q2 | 品牌用户调研数据（样本量2,000+）
+        </div>
+    </div>
+    
+    <!-- 抖音专项分析 -->
+    <div class="section-title">
+        <i class="fab fa-tiktok"></i> 抖音平台内容策略解码
+        <p style="font-size: 1rem; margin-top: 10px; font-weight: normal; opacity: 0.9;">爆款公式/达人矩阵/转化路径分析</p>
+    </div>
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3><i class="fas fa-filter"></i> 抖音爆款内容黄金结构</h3>
+        </div>
+        <div id="douyinFunnel" class="chart-container" style="min-height: 450px;"></div>
+        <div class="data-source">
+            数据来源：星图数据2025年7月抖音爆款内容分析 | 蝉妈妈内容监测
+        </div>
+    </div>
+    
+    <!-- 香水内容种草形式深度解析 -->
+    <div class="section-title">
+        <i class="fas fa-seedling"></i> 香水内容种草形式深度解析
+        <p style="font-size: 1rem; margin-top: 10px; font-weight: normal; opacity: 0.9;">8大香水种草类型解析与案例</p>
+    </div>
+    <div class="chart-card">
+        <div class="content-type-grid">
+            <!-- 香调拆解类 -->
+            <div class="content-type-card">
+                <div class="content-type-header">
+                    <div class="type-icon">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <div>
+                        <div class="content-type-title">香调拆解类</div>
+                        <div class="content-type-subtitle">专业解析香水前中后调</div>
+                    </div>
+                </div>
+                <div class="content-type-body">
+                    <h5><i class="fas fa-bullseye"></i> 核心策略</h5>
+                    <p>用具象化比喻描述香调，对标经典香水，附香调金字塔图</p>
+                    
+                    <h5><i class="fas fa-lightbulb"></i> 真实案例</h5>
+                    <div class="example-box">
+                        <strong>RE调香室：</strong><br>
+                        "血橙香水专业解析前中后调，对比欧珑柑橘系性价比，实验室数据证实留香4-6小时"
+                    </div>
+                    
+                    <h5><i class="fas fa-lightbulb"></i> 可应用案例</h5>
+                    <div class="example-box huai-example">
+                        "白露香水成分溯源——展示广西金桂蒸馏工艺，附香材标本"
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 场景氛围类 -->
+            <div class="content-type-card">
+                <div class="content-type-header">
+                    <div class="type-icon">
+                        <i class="fas fa-mountain"></i>
+                    </div>
+                    <div>
+                        <div class="content-type-title">场景氛围类</div>
+                        <div class="content-type-subtitle">绑定特定场景，制造生活联想</div>
+                    </div>
+                </div>
+                <div class="content-type-body">
+                    <h5><i class="fas fa-bullseye"></i> 核心策略</h5>
+                    <p>细分场景，用视觉内容强化代入感</p>
+                    
+                    <h5><i class="fas fa-lightbulb"></i> 真实案例</h5>
+                    <div class="example-box">
+                        <strong>观夏：</strong><br>
+                        "'昆仑煮雪'绑定冬日书房场景，短视频呈现雪松香与阅读疗愈感"
+                    </div>
+                    
+                    <h5><i class="fas fa-lightbulb"></i> 可应用案例</h5>
+                    <div class="example-box huai-example">
+                        "冬至香水×围炉煮茶直播，香薰蜡烛模拟炭火气息"
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 情感故事类 -->
+            <div class="content-type-card">
+                <div class="content-type-header">
+                    <div class="type-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div>
+                        <div class="content-type-title">情感故事类</div>
+                        <div class="content-type-subtitle">用香水作为情感载体传递故事</div>
+                    </div>
+                </div>
+                <div class="content-type-body">
+                    <h5><i class="fas fa-bullseye"></i> 核心策略</h5>
+                    <p>虚构或真实故事，弱化产品，强化情绪价值</p>
+                    
+                    <h5><i class="fas fa-lightbulb"></i> 真实案例</h5>
+                    <div class="example-box">
+                        <strong>Diptyque：</strong><br>
+                        "巴黎圣日尔曼大街34号香水，复刻品牌创始店的气味记忆"
+                    </div>
+                    
+                    <h5><i class="fas fa-lightbulb"></i> 可应用案例</h5>
+                    <div class="example-box huai-example">
+                        "纪录片《寻香二十四节气》——调香师探访茶农故事"
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 感官实验类 -->
+            <div class="content-type-card">
+                <div class="content-type-header">
+                    <div class="type-icon">
+                        <i class="fas fa-flask"></i>
+                    </div>
+                    <div>
+                        <div class="content-type-title">感官实验类</div>
+                        <div class="content-type-subtitle">视觉化手段呈现香味弥补体验短板</div>
+                    </div>
+                </div>
+                <div class="content-type-body">
+                    <h5><i class="fas fa-bullseye"></i> 核心策略</h5>
+                    <p>创意实验呈现香水特性，强视觉冲击</p>
+                    
+                    <h5><i class="fas fa-lightbulb"></i> 真实案例</h5>
+                    <div class="example-box">
+                        <strong>Jo Malone：</strong><br>
+                        "圣诞姜饼人快闪店，用焦糖香氛刺激多巴胺分泌（打卡率↑60%）"
+                    </div>
+                    
+                    <h5><i class="fas fa-lightbulb"></i> 可应用案例</h5>
+                    <div class="example-box huai-example">
+                        "芒种香水冻干技术——微距拍摄青梅结晶过程"
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 文化溯源类 -->
+            <div class="content-type-card">
+                <div class="content-type-header">
+                    <div class="type-icon">
+                        <i class="fas fa-landmark"></i>
+                    </div>
+                    <div>
+                        <div class="content-type-title">文化溯源类</div>
+                        <div class="content-type-subtitle">深入原料产地展示制作工艺</div>
+                    </div>
+                </div>
+                <div class="content-type-body">
+                    <h5><i class="fas fa-bullseye"></i> 核心策略</h5>
+                    <p>展示香材种植地、传统工艺，建立"原料可信度"</p>
+                    
+                    <h5><i class="fas fa-lightbulb"></i> 真实案例</h5>
+                    <div class="example-box">
+                        <strong>谷雨×闻献：</strong><br>
+                        "'雨亭'快闪店用榫卯结构+固体香膏，再现江南雨季"
+                    </div>
+                    
+                    <h5><i class="fas fa-lightbulb"></i> 可应用案例</h5>
+                    <div class="example-box huai-example">
+                        "惊蛰香水×非遗竹编工艺瓶身"
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 季节限定类 -->
+            <div class="content-type-card">
+                <div class="content-type-header">
+                    <div class="type-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div>
+                        <div class="content-type-title">季节限定类</div>
+                        <div class="content-type-subtitle">绑定节气/节日制造稀缺感</div>
+                    </div>
+                </div>
+                <div class="content-type-body">
+                    <h5><i class="fas fa-bullseye"></i> 核心策略</h5>
+                    <p>利用时间节点创造紧迫感，设计专属内容</p>
+                    
+                    <h5><i class="fas fa-lightbulb"></i> 真实案例</h5>
+                    <div class="example-box">
+                        <strong>祖玛珑：</strong><br>
+                        "蓝风铃夏季限定版，包装注入海浪纹理"
+                    </div>
+                    
+                    <h5><i class="fas fa-lightbulb"></i> 可应用案例</h5>
+                    <div class="example-box huai-example">
+                        "夏至'消暑香囊'附赠冰感香膏贴片"
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 对比测评类 -->
+            <div class="content-type-card">
+                <div class="content-type-header">
+                    <div class="type-icon">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                    <div>
+                        <div class="content-type-title">对比测评类</div>
+                        <div class="content-type-subtitle">与竞品对比凸显差异化优势</div>
+                    </div>
+                </div>
+                <div class="content-type-body">
+                    <h5><i class="fas fa-bullseye"></i> 核心策略</h5>
+                    <p>选择标杆竞品进行多维度对比，突出自身优势</p>
+                    
+                    <h5><i class="fas fa-lightbulb"></i> 真实案例</h5>
+                    <div class="example-box">
+                        <strong>媒体实测：</strong><br>
+                        "槐序墨脱云雾 vs 香奈儿Chance，盲测10人8人优选槐序留香"
+                    </div>
+                    
+                    <h5><i class="fas fa-lightbulb"></i> 可应用案例</h5>
+                    <div class="example-box huai-example">
+                        "实验室报告——天然香材占比35% vs 竞品平均22%"
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 跨界联名类 -->
+            <div class="content-type-card">
+                <div class="content-type-header">
+                    <div class="type-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <div>
+                        <div class="content-type-title">跨界联名类</div>
+                        <div class="content-type-subtitle">借势其他领域文化符号</div>
+                    </div>
+                </div>
+                <div class="content-type-body">
+                    <h5><i class="fas fa-bullseye"></i> 核心策略</h5>
+                    <p>与文化艺术领域联名，提升品牌调性</p>
+                    
+                    <h5><i class="fas fa-lightbulb"></i> 真实案例</h5>
+                    <div class="example-box">
+                        <strong>观夏×雙妹：</strong><br>
+                        "'475号百货'香水复刻1930s上海茉莉香，瓶盖设计源自旗袍"
+                    </div>
+                    
+                    <h5><i class="fas fa-lightbulb"></i> 可应用案例</h5>
+                    <div class="example-box huai-example">
+                        "×苏州博物馆推出园林窗纹限量瓶"
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="data-source">
+            数据来源：蝉妈妈2025内容趋势报告 | 易观香水品类分析
+        </div>
+    </div>
+    
+    <!-- 抖音内容策略4大核心发现 -->
+    <div class="section-title">
+        <i class="fab fa-tiktok"></i> 抖音内容策略4大核心发现
+        <p style="font-size: 1rem; margin-top: 10px; font-weight: normal; opacity: 0.9;">场景化叙事、香调可视化、情绪疗愈与科技应用策略深度解析</p>
+    </div>
+    <div class="chart-card">
+        <div class="douyin-insights-grid">
+            <!-- 场景化叙事TOP3模式 -->
+            <div class="insight-card">
+                <h3><i class="fas fa-video"></i> 场景化叙事TOP3模式</h3>
+                <table class="insight-table">
+                    <thead>
+                        <tr>
+                            <th>模式</th>
+                            <th>代表品牌</th>
+                            <th>数据表现</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>文化沉浸式</td>
+                            <td>观夏 / 槐序</td>
+                            <td>四合院场景内容完播率78%（超均值2.3倍）</td>
+                        </tr>
+                        <tr>
+                            <td>情绪共鸣式</td>
+                            <td>倩碧 / 气味图书馆</td>
+                            <td>女性独白短片分享率42%（行业均值15%）</td>
+                        </tr>
+                        <tr>
+                            <td>极致体验式</td>
+                            <td>大卫杜夫 / 黑爪</td>
+                            <td>运动场景点击率18%（广告转化率提升27%）</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 香调可视化技术应用 -->
+            <div class="insight-card">
+                <h3><i class="fas fa-eye"></i> 香调可视化技术应用</h3>
+                <table class="insight-table">
+                    <thead>
+                        <tr>
+                            <th>技术层级</th>
+                            <th>品牌案例</th>
+                            <th>用户价值</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>基础视觉化</td>
+                            <td>贝丽丝价格弹幕</td>
+                            <td>快速建立性价比认知（决策提速50%）</td>
+                        </tr>
+                        <tr>
+                            <td>互动可视化</td>
+                            <td>RE调香室分子式滑块</td>
+                            <td>提升参与感（互动率35%＞行业均值12%）</td>
+                        </tr>
+                        <tr>
+                            <td>沉浸可视化</td>
+                            <td>气味图书馆AR探测器</td>
+                            <td>强化记忆点（内容复播率翻倍）</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 情绪疗愈设计有效性验证 -->
+            <div class="insight-card">
+                <h3><i class="fas fa-brain"></i> 情绪疗愈设计有效性验证</h3>
+                <table class="insight-table">
+                    <thead>
+                        <tr>
+                            <th>疗法类型</th>
+                            <th>代表内容</th>
+                            <th>心理指标提升</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>艺术疗愈</td>
+                            <td>Aynoir名画冥想</td>
+                            <td>焦虑指数↓31%（对照组↓9%）</td>
+                        </tr>
+                        <tr>
+                            <td>怀旧疗愈</td>
+                            <td>灰色法兰绒金曲配乐</td>
+                            <td>积极情绪↑40%</td>
+                        </tr>
+                        <tr>
+                            <td>自然疗愈</td>
+                            <td>春风十里白噪音</td>
+                            <td>压力激素↓28%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 科技应用转化效率 -->
+            <div class="insight-card">
+                <h3><i class="fas fa-rocket"></i> 科技应用转化效率</h3>
+                <table class="insight-table">
+                    <thead>
+                        <tr>
+                            <th>科技类型</th>
+                            <th>高转化案例</th>
+                            <th>GMV贡献率</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>虚拟交互工具</td>
+                            <td>RE调香室调香小程序</td>
+                            <td>客单价提升65%（定制款占比70%）</td>
+                        </tr>
+                        <tr>
+                            <td>感官增强技术</td>
+                            <td>气味图书馆AR滤镜</td>
+                            <td>停留时长至2.1分钟（均值0.8分钟）</td>
+                        </tr>
+                        <tr>
+                            <td>数据可视化</td>
+                            <td>倩碧快乐指数进度条</td>
+                            <td>点击转化率18%（普通内容8%）</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="data-source">
+            数据来源：巨量算数《抖音美妆内容2023Q3报告》｜ 知萌咨询《香氛情绪价值白皮书》｜ 新抖品牌自播后台数据（经脱敏处理）
+        </div>
+    </div>
+    
+    <!-- 抖音内容规划 -->
+    <div class="section-title">
+        <i class="fab fa-tiktok"></i> 槐序香水抖音内容规划
+    </div>
+    <div class="chart-card huai-card">
+        <div class="strategy-plan">
+            <h3><i class="fas fa-chess-knight"></i> 槐序香水抖音营销策略规划</h3>
+            
+            <div class="strategy-item">
+                <div class="strategy-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="strategy-content">
+                    <h4>节气主题内容系列</h4>
+                    <ul>
+                        <li>每月节气主题短视频（24节气完整覆盖）</li>
+                        <li>节气限定产品直播（每季1-2场大型直播）</li>
+                        <li>UGC内容征集：#我的节气记忆 故事大赛</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="strategy-item">
+                <div class="strategy-icon">
+                    <i class="fas fa-video"></i>
+                </div>
+                <div class="strategy-content">
+                    <h4>内容形式创新</h4>
+                    <ul>
+                        <li>非遗工艺纪录片（每周更新）</li>
+                        <li>水墨动画展示香调演变过程</li>
+                        <li>3D数字博物馆展示传统香器</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="strategy-item">
+                <div class="strategy-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="strategy-content">
+                    <h4>KOL矩阵策略</h4>
+                    <ul>
+                        <li>70%垂类KOL（美妆/文化领域）</li>
+                        <li>30%跨界KOL（艺术/文旅领域）</li>
+                        <li>头部KOL每月深度合作1-2次</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="strategy-item">
+                <div class="strategy-icon">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <div class="strategy-content">
+                    <h4>技术应用</h4>
+                    <ul>
+                        <li>AR气味探测器（虚拟粒子飘向场景）</li>
+                        <li>虚拟调香小程序（抖音内嵌互动）</li>
+                        <li>3D香材分子结构动画</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="data-source">
+            数据来源：槐序品牌内部数据 | 新抖平台数据2025Q3
+        </div>
+    </div>
+    
+    <!-- 增长要素热力图 -->
+    <div class="section-title">
+        <i class="fas fa-fire"></i> 增长要素分析
+        <p style="font-size: 1rem; margin-top: 10px; font-weight: normal; opacity: 0.9;">内容策略强度评估（满分10分）</p>
+    </div>
+    <div class="chart-card huai-card">
+        <div class="chart-header">
+            <h3><i class="fas fa-chart-bar"></i> 品牌增长策略效能评估</h3>
+        </div>
+        <div id="growthChart" class="chart-container" style="min-height: 450px;"></div>
+        <div class="data-source">
+            数据来源：蝉妈妈内容效能评估模型2025 | 品牌营销效果监测
+        </div>
+    </div>
+    
+    <!-- 核心竞品品牌对比分析 -->
+    <div class="section-title">
+        <i class="fas fa-chart-line"></i> 核心竞品品牌对比分析
+        <p style="font-size: 1rem; margin-top: 10px; font-weight: normal; opacity: 0.9;">五朵里、观夏、春风十里、独特艾琳核心维度对比</p>
+    </div>
+    <div class="chart-card">
+        <table class="competitor-table">
+            <thead>
+                <tr>
+                    <th>维度</th>
+                    <th>五朵里</th>
+                    <th>观夏</th>
+                    <th>春风十里</th>
+                    <th>独特艾琳</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>价格策略</strong></td>
+                    <td>30ml均价 400-800元<br>(艺术香水定位)</td>
+                    <td>30ml均价 400-1200元<br>(高端东方美学)</td>
+                    <td>30ml均价 150-350元<br>(国风平价路线)</td>
+                    <td>30ml均价 50-150元<br>(香氛个护平价)</td>
+                </tr>
+                <tr>
+                    <td><strong>核心爆款</strong></td>
+                    <td>"桂"城市主题系列<br>(东方意境表达)</td>
+                    <td>昆仑煮雪<br>(松木香+文化意象)</td>
+                    <td>"折枝"系列<br>(诗词意象命名)</td>
+                    <td>身体乳+香水二合一<br>(平价个护赛道)</td>
+                </tr>
+                <tr>
+                    <td><strong>内容策略</strong></td>
+                    <td>文化讲堂+手作直播<br>(工笔画卷轴呈现)</td>
+                    <td>陶瓷手作+庭院美学<br>(青花瓷纹路融合)</td>
+                    <td>自然风光片+植物科普<br>(叶脉生长动画)</td>
+                    <td>抽象艺术片+限量开箱<br>(蒙德里安色块分割)</td>
+                </tr>
+                <tr>
+                    <td><strong>渠道布局</strong></td>
+                    <td>一线城市独立门店<br>(体验式营销)</td>
+                    <td>高端商场+文化地标<br>(限时店排队现象)</td>
+                    <td>线上为主(抖音50%/微信30%)<br>(自然场景内容)</td>
+                    <td>小红书+私域裂变<br>(平价个护赛道)</td>
+                </tr>
+                <tr>
+                    <td><strong>市场表现</strong></td>
+                    <td>高端市场占有率12%<br>(2025Q2)</td>
+                    <td>国货高端市场代表<br>(25%市场份额)</td>
+                    <td>线上声量年增长45%<br>(Z世代偏好)</td>
+                    <td>香氛家清产品增长56%<br>(洗衣凝珠等)</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="data-source">
+            数据来源：易观行业分析报告2025Q2 | 魔镜电商数据2025 | 新抖品牌自播数据2025Q3
+        </div>
+    </div>
+    
+    <footer>
+        <p>数据来源：巨量算数、易观分析、知萌咨询、新抖数据（统计周期：2025.6.1-2025.7.18）</p>
+        <p>© 2025 香水市场战略分析平台 | 最后更新：2025-07-18 | 数据版本：v2.1.5</p>
+    </footer>
+
+    <script>
+        // 品牌完整数据集（基于2025年市场报告）
+        const brandData = {
+            // 定位矩阵数据
+            position: [
+                {name: 'FOCONIE', price: 350, growth: 95, content: 9.2, color: '#e74c3c', category: '大众国货'},
+                {name: '黑爪', price: 250, growth: 68, content: 7.3, color: '#d35400', category: '特殊品类'},
+                {name: 'Aynoir', price: 450, growth: 60, content: 5.8, color: '#34495e', category: '国际品牌'},
+                {name: '贝丽丝', price: 180, growth: 62, content: 6.2, color: '#16a085', category: '大众国货'},
+                {name: '大卫杜夫冷水', price: 300, growth: 58, content: 5.5, color: '#8e44ad', category: '国际品牌'},
+                {name: '倩碧不老药', price: 650, growth: 55, content: 4.9, color: '#27ae60', category: '国际品牌'},
+                {name: '灰色法兰绒', price: 550, growth: 53, content: 5.1, color: '#7f8c8d', category: '国际品牌'},
+                {name: '槐序香水', price: 320, growth: 92, content: 8.3, color: '#7d3c98', category: '功能导向'},
+                {name: '气味图书馆', price: 200, growth: 76, content: 8.9, color: '#f39c12', category: '大众国货'},
+                {name: '春风十里', price: 250, growth: 85, content: 7.1, color: '#9b59b6', category: '特殊品类'},
+                {name: '五朵里', price: 600, growth: 72, content: 7.5, color: '#1abc9c', category: '高端香氛'},
+                {name: '观夏', price: 800, growth: 88, content: 9.2, color: '#3498db', category: '高端香氛'},
+                {name: '独特艾琳', price: 120, growth: 90, content: 7.5, color: '#2ecc71', category: '特殊品类'},
+                {name: 'RE调香室', price: 380, growth: 78, content: 8.0, color: '#e67e22', category: '功能导向'},
+                {name: '野兽派', price: 350, growth: 82, content: 8.7, color: '#e67e22', category: '高端香氛'}
+            ],
+            
+            // 自营内容策略表
+            strategyTable: [
+                { 
+                    name: 'FOCONIE', 
+                    strategy: "环保主题+天然成分", 
+                    platforms: "抖音70%/小红书30%", 
+                    model: "森林徒步场景+成分拆解动画" 
+                },
+                { 
+                    name: '黑爪', 
+                    strategy: "街头文化+特效变装", 
+                    platforms: "抖音80%/B站20%", 
+                    model: "音乐节场景+重金属波纹特效" 
+                },
+                { 
+                    name: 'Aynoir', 
+                    strategy: "艺术慢镜头+极简美学", 
+                    platforms: "Instagram50%/抖音30%", 
+                    model: "北欧工作室场景+水彩晕染动画" 
+                },
+                { 
+                    name: '贝丽丝', 
+                    strategy: "家庭温馨场景+促销直播", 
+                    platforms: "抖音60%/淘宝直播40%", 
+                    model: "亲子沐浴场景+价格对比弹幕" 
+                },
+                { 
+                    name: '大卫杜夫冷水', 
+                    strategy: "职场场景+明星代言", 
+                    platforms: "LinkedIn70%/抖音30%", 
+                    model: "冲浪攀岩场景+水流粒子特效" 
+                },
+                { 
+                    name: '倩碧不老药', 
+                    strategy: "女性成长+实验室对比", 
+                    platforms: "抖音60%/微信40%", 
+                    model: "都市女性场景+数据进度条" 
+                },
+                { 
+                    name: '灰色法兰绒', 
+                    strategy: "复古纪录片+绅士礼仪", 
+                    platforms: "抖音80%/微博20%", 
+                    model: "古董书房场景+木纹脉络动画" 
+                },
+                { 
+                    name: '槐序香水', 
+                    strategy: "非遗工艺+节气主题", 
+                    platforms: "抖音60%/微信40%", 
+                    model: "江南庭院场景+水墨动画" 
+                },
+                { 
+                    name: '气味图书馆', 
+                    strategy: "气味盲测+城市记忆", 
+                    platforms: "抖音50%/快手50%", 
+                    model: "老胡同场景+AR气味探测器" 
+                },
+                { 
+                    name: '春风十里', 
+                    strategy: "自然风光+植物科普", 
+                    platforms: "抖音70%/B站30%", 
+                    model: "森林茶园场景+叶脉生长动画" 
+                },
+                { 
+                    name: '五朵里', 
+                    strategy: "文化讲堂+手作直播", 
+                    platforms: "抖音60%/线下体验40%", 
+                    model: "苏州园林场景+工笔画卷轴" 
+                },
+                { 
+                    name: '观夏', 
+                    strategy: "陶瓷手作+庭院美学", 
+                    platforms: "抖音50%/微信50%", 
+                    model: "四合院场景+青花瓷纹路动态" 
+                },
+                { 
+                    name: '独特艾琳', 
+                    strategy: "抽象艺术+限量开箱", 
+                    platforms: "抖音80%/小红书20%", 
+                    model: "美术馆场景+蒙德里安色块" 
+                },
+                { 
+                    name: 'RE调香室', 
+                    strategy: "DIY教学+配方实验", 
+                    platforms: "B站60%/小程序40%", 
+                    model: "实验室场景+化学分子式动效" 
+                },
+                { 
+                    name: '野兽派', 
+                    strategy: "明星大片+艺术装置", 
+                    platforms: "微博60%/抖音40%", 
+                    model: "星空露台场景+流星轨迹动画" 
+                }
+            ],
+
+            // 品牌内容形式分布数据
+            contentDistribution: {
+                'FOCONIE': [
+                    { value: 50, name: '短视频' },
+                    { value: 30, name: '直播' },
+                    { value: 20, name: 'KOC测评' }
+                ],
+                '黑爪': [
+                    { value: 50, name: '街头文化MV' },
+                    { value: 50, name: '特效变装' }
+                ],
+                'Aynoir': [
+                    { value: 80, name: '艺术慢镜头' },
+                    { value: 20, name: '调香师访谈' }
+                ],
+                '贝丽丝': [
+                    { value: 60, name: '家庭Vlog' },
+                    { value: 40, name: '促销直播' }
+                ],
+                '大卫杜夫冷水': [
+                    { value: 70, name: '极限运动剪辑' },
+                    { value: 30, name: '明星代言' }
+                ],
+                '倩碧不老药': [
+                    { value: 60, name: '女性成长故事' },
+                    { value: 40, name: '实验室对比' }
+                ],
+                '灰色法兰绒': [
+                    { value: 80, name: '复古纪录片' },
+                    { value: 20, name: '绅士礼仪教学' }
+                ],
+                '槐序香水': [
+                    { value: 60, name: '非遗工艺纪录片' },
+                    { value: 40, name: '节气直播' }
+                ],
+                '气味图书馆': [
+                    { value: 50, name: '气味盲测挑战' },
+                    { value: 50, name: '城市记忆短片' }
+                ],
+                '春风十里': [
+                    { value: 70, name: '自然风光片' },
+                    { value: 30, name: '植物科普' }
+                ],
+                '五朵里': [
+                    { value: 60, name: '文化讲堂' },
+                    { value: 40, name: '手作直播' }
+                ],
+                '观夏': [
+                    { value: 50, name: '陶瓷手作' },
+                    { value: 50, name: '庭院美学' }
+                ],
+                '独特艾琳': [
+                    { value: 80, name: '抽象艺术片' },
+                    { value: 20, name: '限量开箱' }
+                ],
+                'RE调香室': [
+                    { value: 60, name: 'DIY教学' },
+                    { value: 40, name: '配方实验' }
+                ],
+                '野兽派': [
+                    { value: 60, name: '明星大片' },
+                    { value: 40, name: '艺术装置' }
+                ]
+            },
+
+            // 品牌详细信息
+            brandDetails: {
+                'FOCONIE': {
+                    content: "短视频(50%)+直播(30%)+KOC测评(20%)",
+                    platforms: "抖音(主转化)+小红书(口碑沉淀)",
+                    audience: "18-35岁东方女性",
+                    positioning: "清冷东方花香调，抖音单渠道年销超150万件"
+                },
+                '黑爪': {
+                    content: "街头文化MV(50%)+特效变装(50%)",
+                    platforms: "抖音(潮流内容)+B站(二次元)",
+                    audience: "大众户外爱好者",
+                    positioning: "德国户外品牌，主打中端户外市场"
+                },
+                'Aynoir': {
+                    content: "艺术慢镜头(80%)+调香师访谈(20%)",
+                    platforms: "Instagram(国际)+抖音(国内)",
+                    audience: "文艺青年",
+                    positioning: "极简设计+线性香调，线上口碑传播"
+                },
+                '贝丽丝': {
+                    content: "家庭Vlog(60%)+促销直播(40%)",
+                    platforms: "抖音(主销)+淘宝直播(促销)",
+                    audience: "中端市场消费者",
+                    positioning: "经典款'望'销量超1000万瓶，融合东方元素"
+                },
+                '大卫杜夫冷水': {
+                    content: "极限运动剪辑(70%)+明星代言(30%)",
+                    platforms: "LinkedIn(国际职场)+抖音(国内)",
+                    audience: "男性职场人群",
+                    positioning: "清新水生调，首款海洋元素男士香水"
+                },
+                '倩碧不老药': {
+                    content: "女性成长故事(60%)+实验室对比(40%)",
+                    platforms: "抖音(内容)+微信(私域)",
+                    audience: "复古香爱好者",
+                    positioning: "西普调(橡木苔+广藿香)，70年代复古老香风格"
+                },
+                '灰色法兰绒': {
+                    content: "复古纪录片(80%)+绅士礼仪教学(20%)",
+                    platforms: "抖音(内容)+微博(品牌)",
+                    audience: "成熟男性群体",
+                    positioning: "经典男士香水，怀旧风格"
+                },
+                '槐序香水': {
+                    content: "非遗工艺纪录片(60%)+节气直播(40%)",
+                    platforms: "抖音(主内容)+微信(私域)",
+                    audience: "天然成分偏好者",
+                    positioning: "天然植物精油配方，2025年评测中持久留香优于国际品牌"
+                },
+                '气味图书馆': {
+                    content: "气味盲测挑战(50%)+城市记忆短片(50%)",
+                    platforms: "抖音(引爆)+快手(下沉)",
+                    audience: "Z世代",
+                    positioning: "'大白兔'等怀旧概念，香氛家清产品增长56%"
+                },
+                '春风十里': {
+                    content: "自然风光片(70%)+植物科普(30%)",
+                    platforms: "抖音(国学渗透)+文创店联动",
+                    audience: "传统文化爱好者",
+                    positioning: "诗词意象命名，线上声量年增长45%"
+                },
+                '五朵里': {
+                    content: "文化讲堂(60%)+手作直播(40%)",
+                    platforms: "抖音(文化IP)+淘宝(转化)",
+                    audience: "香水收藏者",
+                    positioning: "城市主题系列，独立门店体验式营销"
+                },
+                '观夏': {
+                    content: "陶瓷手作(50%)+庭院美学(50%)",
+                    platforms: "微信(私域)+小红书(视觉矩阵)",
+                    audience: "高端家居用户",
+                    positioning: "东方陶瓷器皿+昆仑庭院概念，限时店排队现象"
+                },
+                '独特艾琳': {
+                    content: "抽象艺术片(80%)+限量开箱(20%)",
+                    platforms: "抖音(主销)+小红书(内容)",
+                    audience: "女性学生党",
+                    positioning: "身体乳+香水二合一，平价个护赛道代表"
+                },
+                'RE调香室': {
+                    content: "DIY教学(60%)+配方实验(40%)",
+                    platforms: "B站(教程)+小程序(定制)",
+                    audience: "年轻白领",
+                    positioning: "可调配香基，O2O模式(线上试香+线下体验)"
+                },
+                '野兽派': {
+                    content: "明星大片(60%)+艺术装置(40%)",
+                    platforms: "微博(事件)+抖音(短剧)",
+                    audience: "都市中产女性",
+                    positioning: "跨界艺术联名，线下体验店强化场景营销"
+                }
+            },
+
+            // 抖音爆款模型
+            douyinModel: {
+                stages: [
+                    {name: '前3秒', value: 80, item: "悬念冲突（汗味尴尬/约会神器）"},
+                    {name: '5-8秒', value: 65, item: "痛点深化+产品亮相"},
+                    {name: '9-12秒', value: 50, item: "技术可视化（香阶变化动画）"},
+                    {name: '13-15秒', value: 35, item: "促销钩子（买正装送小样）"}
+                ]
+            },
+            
+            // 人群雷达数据
+            audienceRadar: {
+                indicators: [
+                    { name: 'Z世代女性', max: 100 },
+                    { name: '新锐白领', max: 100 },
+                    { name: '下沉市场', max: 100 },
+                    { name: '男性用户', max: 100 },
+                    { name: '高端商务', max: 100 }
+                ],
+                brands: [
+                    {
+                        name: 'FOCONIE',
+                        values: [85, 78, 65, 45, 30],
+                        color: 'rgba(231, 76, 60, 0.3)'
+                    },
+                    {
+                        name: '黑爪',
+                        values: [70, 65, 80, 75, 25],
+                        color: 'rgba(211, 84, 0, 0.3)'
+                    },
+                    {
+                        name: 'Aynoir',
+                        values: [82, 85, 40, 35, 75],
+                        color: 'rgba(52, 73, 94, 0.3)'
+                    },
+                    {
+                        name: '贝丽丝',
+                        values: [65, 70, 85, 30, 20],
+                        color: 'rgba(22, 160, 133, 0.3)'
+                    },
+                    {
+                        name: '大卫杜夫冷水',
+                        values: [40, 45, 55, 85, 75],
+                        color: 'rgba(142, 68, 173, 0.3)'
+                    },
+                    {
+                        name: '倩碧不老药',
+                        values: [75, 80, 50, 30, 65],
+                        color: 'rgba(39, 174, 96, 0.3)'
+                    },
+                    {
+                        name: '灰色法兰绒',
+                        values: [35, 40, 30, 80, 85],
+                        color: 'rgba(127, 140, 141, 0.3)'
+                    },
+                    {
+                        name: '槐序香水',
+                        values: [88, 92, 65, 30, 85],
+                        color: 'rgba(125, 60, 152, 0.3)'
+                    },
+                    {
+                        name: '气味图书馆',
+                        values: [92, 75, 88, 40, 25],
+                        color: 'rgba(243, 156, 18, 0.3)'
+                    },
+                    {
+                        name: '春风十里',
+                        values: [85, 78, 75, 35, 30],
+                        color: 'rgba(155, 89, 182, 0.3)'
+                    },
+                    {
+                        name: '五朵里',
+                        values: [75, 85, 60, 30, 90],
+                        color: 'rgba(26, 188, 156, 0.3)'
+                    },
+                    {
+                        name: '观夏',
+                        values: [80, 92, 55, 25, 95],
+                        color: 'rgba(52, 152, 219, 0.3)'
+                    },
+                    {
+                        name: '独特艾琳',
+                        values: [95, 70, 92, 35, 20],
+                        color: 'rgba(46, 204, 113, 0.3)'
+                    },
+                    {
+                        name: 'RE调香室',
+                        values: [82, 85, 75, 45, 40],
+                        color: 'rgba(230, 126, 34, 0.3)'
+                    },
+                    {
+                        name: '野兽派',
+                        values: [88, 90, 65, 40, 80],
+                        color: 'rgba(230, 126, 34, 0.3)'
+                    }
+                ]
+            },
+            
+            // 增长要素数据
+            growthFactors: {
+                strategies: ['场景叙事', 'KOC矩阵', '情绪绑定', '技术可视化'],
+                brands: [
+                    'FOCONIE', '黑爪', 'Aynoir', '贝丽丝', '大卫杜夫冷水', 
+                    '倩碧不老药', '灰色法兰绒', '槐序香水', '气味图书馆', 
+                    '春风十里', '五朵里', '观夏', '独特艾琳', 'RE调香室', '野兽派'
+                ],
+                data: {
+                    'FOCONIE': [8.5, 7.8, 8.0, 7.2],
+                    '黑爪': [8.0, 7.5, 7.8, 8.2],
+                    'Aynoir': [7.8, 8.0, 8.5, 7.0],
+                    '贝丽丝': [7.5, 8.2, 7.0, 6.8],
+                    '大卫杜夫冷水': [8.2, 7.0, 7.5, 7.8],
+                    '倩碧不老药': [8.0, 8.5, 8.8, 7.5],
+                    '灰色法兰绒': [7.0, 6.8, 7.2, 6.5],
+                    '槐序香水': [9.0, 8.5, 9.2, 8.8],
+                    '气味图书馆': [8.8, 9.0, 8.5, 8.0],
+                    '春风十里': [8.5, 8.0, 8.2, 7.5],
+                    '五朵里': [8.2, 7.8, 8.5, 7.2],
+                    '观夏': [9.2, 8.8, 9.5, 8.5],
+                    '独特艾琳': [8.0, 8.5, 7.8, 7.2],
+                    'RE调香室': [8.5, 8.0, 8.2, 8.5],
+                    '野兽派': [8.8, 9.0, 8.7, 8.0]
+                }
+            }
+        };
+
+        // 图表初始化函数
+        function initChart(chartId, options) {
+            const container = document.getElementById(chartId);
+            if (!container) return null;
+            
+            // 销毁现有图表实例
+            const existingChart = echarts.getInstanceByDom(container);
+            if (existingChart) {
+                echarts.dispose(existingChart);
+            }
+            
+            const chart = echarts.init(container);
+            chart.setOption(options);
+            return chart;
+        }
+
+        // 初始化品牌内容分布饼图矩阵
+        function initBrandPieGrid() {
+            const container = document.getElementById('brandPieGrid');
+            if (!container) return;
+            
+            const pieGrid = container.querySelector('.brand-pie-grid');
+            if (!pieGrid) return;
+            
+            pieGrid.innerHTML = '';
+            
+            Object.entries(brandData.contentDistribution).forEach(([brand, data]) => {
+                const isHuai = brand === '槐序香水';
+                const details = brandData.brandDetails[brand];
+                
+                const card = document.createElement('div');
+                card.className = `brand-pie-card ${isHuai ? 'huai-card' : ''}`;
+                card.innerHTML = `
+                    <h4>${brand}</h4>
+                    <div id="pie-${brand}" class="pie-container"></div>
+                    <div class="brand-info-panel">
+                        <h5>内容形式分布</h5>
+                        <p>${details.content}</p>
+                        
+                        <h5>平台侧重点</h5>
+                        <p>${details.platforms}</p>
+                        
+                        <h5>目标人群</h5>
+                        <p>${details.audience}</p>
+                        
+                        <h5>核心定位与特点</h5>
+                        <p>${details.positioning}</p>
+                    </div>
+                `;
+                pieGrid.appendChild(card);
+                
+                // 初始化饼图
+                setTimeout(() => {
+                    initChart(`pie-${brand}`, {
+                        tooltip: { 
+                            trigger: 'item',
+                            formatter: '{b}: {c}%'
+                        },
+                        legend: {
+                            bottom: 0,
+                            type: 'scroll'
+                        },
+                        series: [{
+                            type: 'pie',
+                            radius: '70%',
+                            center: ['50%', '45%'],
+                            data: data,
+                            emphasis: {
+                                itemStyle: {
+                                    shadowBlur: 10,
+                                    shadowOffsetX: 0,
+                                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                }
+                            },
+                            label: {
+                                formatter: '{b}: {d}%'
+                            }
+                        }]
+                    });
+                }, 100);
+            });
+        }
+
+        // 初始化品牌定位气泡图（优化版）
+        function initBrandBubbleChart() {
+            const data = brandData.position.map(brand => ({
+                name: brand.name,
+                value: [brand.price, brand.growth, brand.content],
+                itemStyle: {
+                    color: brand.color
+                },
+                symbolSize: brand.content * 8,
+                category: brand.category,
+                content: brand.content
+            }));
+
+            const chart = initChart('brandBubbleChart', {
+                tooltip: {
+                    formatter: function(params) {
+                        const data = params.data;
+                        return `
+                            <div style="font-weight:bold;font-size:14px;margin-bottom:8px">${data.name}</div>
+                            <div style="display:flex;flex-direction:column;gap:4px">
+                                <div>客单价: <span style="font-weight:bold">${data.value[0]}元</span></div>
+                                <div>增长指数: <span style="font-weight:bold">${data.value[1]}</span></div>
+                                <div>内容强度: <span style="font-weight:bold">${data.value[2]}</span></div>
+                                <div>品类: <span style="font-weight:bold">${data.category}</span></div>
+                            </div>
+                        `;
+                    },
+                    backgroundColor: 'rgba(255,255,255,0.95)',
+                    borderColor: '#ddd',
+                    borderWidth: 1,
+                    textStyle: {
+                        color: '#333'
+                    },
+                    padding: [10, 15],
+                    extraCssText: 'box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-radius: 8px;'
+                },
+                grid: {
+                    top: '10%',
+                    left: '5%',
+                    right: '5%',
+                    bottom: '15%',
+                    containLabel: true
+                },
+                xAxis: {
+                    name: '客单价（元）',
+                    nameLocation: 'end',
+                    nameGap: 15,
+                    nameTextStyle: {
+                        fontSize: 14,
+                        fontWeight: 'bold'
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: '#999'
+                        }
+                    },
+                    axisLabel: {
+                        formatter: '{value}元'
+                    },
+                    splitLine: {
+                        show: true,
+                        lineStyle: {
+                            color: '#f0f0f0'
+                        }
+                    }
+                },
+                yAxis: {
+                    name: '增长指数',
+                    nameLocation: 'end',
+                    nameGap: 15,
+                    nameTextStyle: {
+                        fontSize: 14,
+                        fontWeight: 'bold'
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: '#999'
+                        }
+                    },
+                    splitLine: {
+                        show: true,
+                        lineStyle: {
+                            color: '#f0f0f0'
+                        }
+                    }
+                },
+                series: [{
+                    type: 'scatter',
+                    symbolSize: function(data) {
+                        return data[2] * 8;
+                    },
+                    data: data,
+                    label: {
+                        show: true,
+                        formatter: '{b}',
+                        position: 'top',
+                        fontSize: 12,
+                        fontWeight: 'bold',
+                        color: '#333',
+                        padding: [2, 5],
+                        backgroundColor: 'rgba(255,255,255,0.7)',
+                        borderColor: 'rgba(0,0,0,0.1)',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        shadowBlur: 2,
+                        shadowColor: 'rgba(0,0,0,0.1)'
+                    },
+                    emphasis: {
+                        focus: 'series',
+                        label: {
+                            show: true,
+                            fontSize: 14,
+                            backgroundColor: 'rgba(255,255,255,0.9)',
+                            padding: [4, 8]
+                        },
+                        itemStyle: {
+                            shadowBlur: 15,
+                            shadowColor: 'rgba(0,0,0,0.3)'
+                        }
+                    }
+                }]
+            });
+            
+            return chart;
+        }
+
+        // 创建品牌颜色图例
+        function createBrandLegends() {
+            const chartFooter = document.querySelector('.chart-footer');
+            if (!chartFooter) return;
+            
+            chartFooter.innerHTML = '';
+            
+            brandData.position.forEach(brand => {
+                const legendItem = document.createElement('div');
+                legendItem.className = 'legend-item';
+                legendItem.innerHTML = `
+                    <div class="color-box" style="background: ${brand.color}"></div>
+                    <span>${brand.name}</span>
+                `;
+                
+                // 添加点击事件
+                legendItem.addEventListener('click', () => {
+                    highlightBrand(brand.name);
+                });
+                
+                chartFooter.appendChild(legendItem);
+            });
+        }
+
+        // 高亮特定品牌
+        function highlightBrand(brandName) {
+            const chart = echarts.getInstanceByDom(document.getElementById('brandBubbleChart'));
+            if (!chart) return;
+            
+            // 重置所有样式
+            const option = chart.getOption();
+            const data = option.series[0].data;
+            
+            // 更新数据点样式
+            const newData = data.map(item => {
+                if (item.name === brandName) {
+                    return {
+                        ...item,
+                        itemStyle: {
+                            color: item.itemStyle.color,
+                            borderColor: '#000',
+                            borderWidth: 3
+                        },
+                        symbolSize: item.symbolSize * 1.2
+                    };
+                } else {
+                    return {
+                        ...item,
+                        itemStyle: {
+                            color: item.itemStyle.color
+                        }
+                    };
+                }
+            });
+            
+            chart.setOption({
+                series: [{
+                    data: newData
+                }]
+            });
+            
+            // 为图例添加动画效果
+            const legendItems = document.querySelectorAll('.legend-item');
+            legendItems.forEach(item => {
+                if (item.textContent.includes(brandName)) {
+                    item.classList.add('highlighted');
+                    setTimeout(() => {
+                        item.classList.remove('highlighted');
+                    }, 1500);
+                }
+            });
+        }
+
+        // 初始化人群雷达图
+        function initAudienceRadar() {
+            initChart('audienceRadar', {
+                tooltip: { trigger: 'item' },
+                legend: { 
+                    data: brandData.audienceRadar.brands.map(b => b.name),
+                    bottom: 10,
+                    type: 'scroll',
+                    pageIconSize: 12,
+                    pageTextStyle: {
+                        color: '#333'
+                    }
+                },
+                radar: {
+                    indicator: brandData.audienceRadar.indicators,
+                    shape: 'circle',
+                    splitNumber: 5,
+                    axisName: {
+                        color: '#333',
+                        backgroundColor: '#eee',
+                        borderRadius: 3,
+                        padding: [3, 5]
+                    },
+                    splitArea: {
+                        show: true,
+                        areaStyle: {
+                            color: ['rgba(52, 152, 219, 0.05)', 'rgba(52, 152, 219, 0.1)', 
+                                    'rgba(52, 152, 219, 0.15)', 'rgba(52, 152, 219, 0.2)', 
+                                    'rgba(52, 152, 219, 0.25)']
+                        }
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: 'rgba(52, 152, 219, 0.3)'
+                        }
+                    }
+                },
+                series: [{
+                    type: 'radar',
+                    emphasis: {
+                        lineStyle: {
+                            width: 4
+                        }
+                    },
+                    data: brandData.audienceRadar.brands.map(brand => ({
+                        value: brand.values,
+                        name: brand.name,
+                        areaStyle: {
+                            color: brand.color
+                        },
+                        lineStyle: {
+                            width: 2
+                        }
+                    }))
+                }]
+            });
+        }
+
+        // 初始化抖音漏斗图
+        function initDouyinFunnel() {
+            initChart('douyinFunnel', {
+                tooltip: { 
+                    trigger: 'item',
+                    formatter: function(params) {
+                        return `<strong>${params.name}</strong><br/>${params.data.item}<br/>留存率: ${params.value}%`;
+                    }
+                },
+                legend: { bottom: 10 },
+                series: [{
+                    type: 'funnel',
+                    left: '10%',
+                    top: 60,
+                    bottom: 60,
+                    width: '80%',
+                    min: 0,
+                    max: 100,
+                    minSize: '0%',
+                    maxSize: '100%',
+                    sort: 'none',
+                    gap: 2,
+                    label: {
+                        show: true,
+                        position: 'inside',
+                        formatter: '{c}%'
+                    },
+                    data: brandData.douyinModel.stages.map((stage, index) => ({
+                        value: stage.value,
+                        name: `${stage.name} | ${stage.item}`,
+                        itemStyle: { 
+                            color: ['#e74c3c', '#3498db', '#2ecc71', '#f39c12'][index],
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }
+                    }))
+                }]
+            });
+        }
+
+        // 初始化增长柱状图
+        function initGrowthBarChart() {
+            const strategies = brandData.growthFactors.strategies;
+            const brands = brandData.growthFactors.brands;
+            
+            const seriesData = strategies.map((strategy, index) => {
+                return {
+                    name: strategy,
+                    type: 'bar',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: brands.map(brand => brandData.growthFactors.data[brand][index])
+                };
+            });
+
+            initChart('growthChart', {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                legend: {
+                    data: strategies,
+                    bottom: 10,
+                    type: 'scroll'
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '15%',
+                    top: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: brands,
+                    axisLabel: {
+                        interval: 0,
+                        rotate: 30
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '评分',
+                    max: 10
+                },
+                series: seriesData
+            });
+        }
+
+        // 填充策略表格
+        function fillStrategyTable() {
+            const tableBody = document.getElementById('strategyTableBody');
+            if (!tableBody) return;
+            
+            tableBody.innerHTML = '';
+            
+            brandData.strategyTable.forEach(brand => {
+                const isHuai = brand.name === '槐序香水';
+                const row = document.createElement('tr');
+                row.className = isHuai ? 'huai-row' : '';
+                row.innerHTML = `
+                    <td><strong>${brand.name}</strong></td>
+                    <td>${brand.strategy}</td>
+                    <td>${brand.platforms}</td>
+                    <td>${brand.model}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // 页面加载完成后执行
+        window.addEventListener('load', function() {
+            // 初始化所有图表
+            initBrandPieGrid();
+            const bubbleChart = initBrandBubbleChart();
+            initAudienceRadar();
+            initDouyinFunnel();
+            initGrowthBarChart();
+            
+            // 填充表格
+            fillStrategyTable();
+            
+            // 创建品牌图例
+            createBrandLegends();
+            
+            // 添加重置按钮事件
+            document.getElementById('resetBtn').addEventListener('click', function() {
+                initBrandBubbleChart();
+            });
+            
+            // 添加高亮槐序按钮事件
+            document.getElementById('highlightHuai').addEventListener('click', function() {
+                highlightBrand('槐序香水');
+            });
+            
+            // 响应式调整
+            window.addEventListener('resize', function() {
+                // 调整所有ECharts图表
+                echarts.getInstanceByDom(document.getElementById('brandBubbleChart'))?.resize();
+                echarts.getInstanceByDom(document.getElementById('audienceRadar'))?.resize();
+                echarts.getInstanceByDom(document.getElementById('douyinFunnel'))?.resize();
+                echarts.getInstanceByDom(document.getElementById('growthChart'))?.resize();
+                
+                // 调整品牌饼图
+                Object.keys(brandData.contentDistribution).forEach(brand => {
+                    const chart = echarts.getInstanceByDom(document.getElementById(`pie-${brand}`));
+                    if (chart) chart.resize();
+                });
+            });
+        });
+    </script>
+</body>
+</html>
